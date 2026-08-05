@@ -1,0 +1,170 @@
+# Administration
+
+## Overview
+
+A hub page (`AdminPage`) with six tiles, each opening a dedicated admin
+sub-page: **User Management**, **Alert Rules**, **Compliance Policies**,
+**Audit Log**, **Risk Models**, **Integrations**. Of these, **User
+Management**, **Compliance Policies**, and **Integrations** are new — before
+this round, their tiles existed and were clickable but routed nowhere real
+(the routing `switch` had no case for them, so it silently fell back to
+re-rendering the hub). Audit Log, Alert Rules, and Risk Models are
+pre-existing and unchanged; documented here for completeness since they
+share the same routing structure.
+
+## Files
+
+| File | Responsibility |
+|---|---|
+| `src/app/App.tsx` — `AdminPage` | The 6-tile hub. |
+| `src/app/App.tsx` — `AuditLogPage`, `AlertRulesPage`, `RiskModelsPage` | Pre-existing sub-pages (unchanged). |
+| `src/app/pages/admin/UserManagementPage.tsx` | Users / Roles / Groups / SSO-Directory — new. |
+| `src/app/pages/admin/CompliancePoliciesPage.tsx` | Policy CRUD — new. |
+| `src/app/pages/admin/IntegrationsPage.tsx` | Integration configuration — new. |
+| `src/app/components/Modal.tsx` | Shared `Modal`, `ModalFooter`, `FormField`, `inputClass` used by every CRUD form below. |
+
+## Routing
+
+```tsx
+// App.tsx
+type AdminSection = "user-management" | "alert-rules" | "compliance-policies" | "audit-log" | "risk-models" | "integrations";
+const [adminSection, setAdminSection] = useState<AdminSection | null>(null);
+
+function handleAdminSection(s: AdminSection) { setAdminSection(s); setActive("administration"); }
+function handleAdminBack()              { setAdminSection(null); setActive("administration"); }
+
+function renderAdminSection() {
+  switch (adminSection) {
+    case "audit-log":            return <AuditLogPage onBack={handleAdminBack} />;
+    case "alert-rules":          return <AlertRulesPage onBack={handleAdminBack} />;
+    case "risk-models":          return <RiskModelsPage onBack={handleAdminBack} />;
+    case "user-management":      return <UserManagementPage onBack={handleAdminBack} />;
+    case "compliance-policies":  return <CompliancePoliciesPage onBack={handleAdminBack} />;
+    case "integrations":         return <IntegrationsPage onBack={handleAdminBack} />;
+    default:                     return <AdminPage onSectionSelect={handleAdminSection} />;
+  }
+}
+```
+
+Every sub-page takes just `{ onBack: () => void }` and renders its own
+breadcrumb (`Administration > <Section>`) with `onBack` wired to the
+"Administration" link, returning to the hub.
+
+## User Management
+
+`src/app/pages/admin/UserManagementPage.tsx` — 4 internal tabs (local `tab`
+state: `"users" | "roles" | "groups" | "sso"`), each with its own local
+`useState` list, seeded from module-level constants in the same file.
+
+```ts
+type Role = { id: string; name: string; description: string; permissions: string[] };
+type Group = { id: string; name: string; description: string; roleIds: string[] };
+type UserAccount = {
+  id: string; name: string; email: string; status: "Active" | "Inactive";
+  roleIds: string[]; groupIds: string[]; lastLogin: string;
+};
+```
+
+**Relationship model** (as requested — roles direct *and* via group):
+a user's roles come from two places, `roleIds` (assigned directly) and every
+role attached to each group in `groupIds`. The union is computed live:
+
+```tsx
+const effectiveRoleIds = (u: UserAccount) => Array.from(new Set([
+  ...u.roleIds,
+  ...u.groupIds.flatMap((gid) => groups.find((g) => g.id === gid)?.roleIds ?? []),
+]));
+```
+
+The Users table shows Direct Roles, Groups, and Effective Roles as three
+separate columns so the distinction is visible.
+
+- **Users tab** — table + Add/Edit (`UserModal`) + Delete (`window.confirm`
+  guard). The modal lets you toggle Status (Active/Inactive), and multi-select
+  both Direct Roles and Groups via chip buttons.
+- **Roles tab** — card list + Add/Edit (`RoleModal`) + Delete. Each role has
+  a name, description, and a multi-select of permissions from a fixed
+  9-item `ALL_PERMISSIONS` list (`View Alerts`, `Manage Alerts`, `View
+  Cases`, `Manage Cases`, `View Clients`, `Manage Clients`, `View Reports`,
+  `Manage Policies`, `System Administration`).
+- **Groups tab** — card list + Add/Edit (`GroupModal`) + Delete. Each group
+  has a name, description, and a multi-select of roles it grants to members.
+- **SSO / Directory tab** (`SsoTab`) — the client-directory connection form:
+  Provider (`Generic LDAP / Active Directory`, `Azure AD / Entra ID`,
+  `Okta`, `SAML 2.0`), Directory URL, Base DN, Bind DN, Bind Password,
+  Default Role for new SSO users (populated from the live `roles` list),
+  Sync Schedule, an "Auto-provision new users on first sign-in" checkbox, a
+  master enable toggle (fields are visually disabled/greyed while off), a
+  **Save Configuration** button, and a **Test Connection** button that
+  fakes a ~900ms round trip and reports "Connection successful."
+
+IDs for new records are generated by a local `nextId(prefix)` closure
+(`ROL-05`, `GRP-04`, `USR-06`, zero-padded to 2 digits) over a module-level
+`seq` counter shared across all three entity types in this file.
+
+## Compliance Policies
+
+`src/app/pages/admin/CompliancePoliciesPage.tsx`
+
+```ts
+type Policy = {
+  id: string; title: string; category: string; description: string;
+  status: "Draft" | "Active" | "Under Review" | "Archived";
+  version: string; owner: string; effectiveDate: string;
+};
+```
+
+- 7 seeded policies across `CATEGORIES = ["AML", "KYC", "Sanctions", "CTF",
+  "Data Privacy", "General"]`.
+- Category filter chips ("All" + each category) above a card list.
+- "New Policy" and each card's edit-pencil open the same `PolicyModal`
+  (create vs. edit determined by whether a `Policy` or `null` was passed
+  in); trash-can deletes with a `window.confirm` guard.
+- `PolicyModal` fields: Title*, Category (select), Status (select:
+  Draft/Active/Under Review/Archived), Version, Owner, Effective Date,
+  Description (textarea). New policy IDs: `POL-008`, `POL-009`, ... via a
+  local `nextId()` counter seeded from the initial list length.
+
+## Integrations
+
+`src/app/pages/admin/IntegrationsPage.tsx`
+
+```ts
+type Integration = {
+  id: string; name: string; category: string; description: string;
+  enabled: boolean; endpoint: string; apiKey: string; syncFrequency: string;
+};
+```
+
+- 9 seeded integrations spanning categories Screening, Data Source,
+  Regulatory, Notifications, Data Export — e.g. OFAC/Sanctions List Feed,
+  PEP Database, Core Banking System, SAR e-Filing (FinCEN), Email/SMTP,
+  Slack/Teams Alerts, SIEM/Webhook Export, Credit Bureau Data, Case
+  Management Sync.
+- Grid of cards, each with a category label, an inline enable/disable
+  toggle (mutates state directly, no modal needed), name + description +
+  masked endpoint preview, and a "Configure" button opening
+  `IntegrationModal`.
+- `IntegrationModal` fields: Endpoint/URL, API Key/Credential (`type="password"`,
+  pre-filled with the integration's existing masked key, e.g. `••••••••3f2a`
+  — saving without touching it just re-saves that same masked string),
+  Sync Frequency (select), and an "enabled" checkbox mirroring the card's
+  toggle. No create/delete — the integration list itself is fixed;
+  only configuration and enabled state are editable.
+
+## Known limitations (not yet implemented)
+
+- Everything in all three new sub-pages is local component `useState` —
+  none of it is lifted to `App()` or persisted; navigating away from
+  Administration and back (or reloading) resets Users/Roles/Groups/SSO
+  config/Policies/Integrations to their seeded defaults.
+- Delete confirmations use the browser's native `window.confirm`, not a
+  themed modal.
+- SSO "Test Connection" and policy/integration "Save" actions are entirely
+  simulated (a `setTimeout`-based success state) — nothing is actually
+  validated or sent anywhere.
+- No pagination, sorting, or bulk actions on any of the three new admin
+  tables/lists.
+- ID generation in each file uses its own local counter — there's no
+  central ID authority, so e.g. `UserManagementPage`'s `ROL-*` IDs and any
+  future backend-issued role IDs could collide.

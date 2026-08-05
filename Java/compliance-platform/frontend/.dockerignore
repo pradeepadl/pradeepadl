@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+.idea
+*.iml
+# Reference/design screenshots — not imported by any component, no need to ship them in the image
+src/imports
