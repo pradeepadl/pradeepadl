@@ -1,0 +1,17 @@
+databaseChangeLog:
+  # Schema changes (CREATE/ALTER/DROP TABLE, indexes, constraints, sequences)
+  # live under ddl/. Reference/seed data (lookup rows, fixed data) lives
+  # under dml/. Each folder is picked up wholesale via includeAll, sorted by
+  # filename — so number new changesets to control ordering, e.g.:
+  #   ddl/0002-create-user-table.yaml
+  #   dml/0002-seed-user-roles.yaml
+  # Add a file to the folder and it runs on the next startup; no need to
+  # touch this master file.
+  - includeAll:
+      path: db/changelog/ddl
+      relativeToChangelogFile: false
+      errorIfMissingOrEmpty: false
+  - includeAll:
+      path: db/changelog/dml
+      relativeToChangelogFile: false
+      errorIfMissingOrEmpty: false

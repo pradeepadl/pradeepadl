@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001-baseline
+      author: cddp
+      comment: >
+        Baseline marker — establishes the DML changelog stream. Add real
+        reference/seed-data changesets (INSERT/UPDATE for lookup or fixed
+        data) here as separate 000N-description.yaml files;
+        db.changelog-master.yaml picks them up automatically via includeAll.
+      changes:
+        - tagDatabase:
+            tag: dml-baseline

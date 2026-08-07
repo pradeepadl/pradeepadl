@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001-baseline
+      author: cddp
+      comment: >
+        Baseline marker — establishes the DDL changelog stream. Add real
+        schema changesets (CREATE TABLE, ALTER TABLE, indexes, constraints)
+        here as separate 000N-description.yaml files; db.changelog-master.yaml
+        picks them up automatically via includeAll.
+      changes:
+        - tagDatabase:
+            tag: ddl-baseline
