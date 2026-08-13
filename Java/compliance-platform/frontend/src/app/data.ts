@@ -95,11 +95,26 @@ export const initialCaseAlertLinks: Record<string, string[]> = {
   "CSE-0283": ["ALT-4813"],
 };
 
+// Answers captured on the Onboarding tab's KYC questionnaire. Optional on
+// ClientDetail because existing clients weren't necessarily onboarded
+// through this form — selecting one that hasn't completed it yet just
+// starts the questionnaire blank instead of failing to auto-populate.
+export type OnboardingQuestionnaire = {
+  purpose: string;
+  expectedVolume: string;
+  sourceOfFunds: string;
+  isPEP: boolean;
+  beneficialOwnership25: boolean;
+  sanctionsScreened: boolean;
+  notes: string;
+};
+
 export type ClientDetail = {
   contact: string; email: string; phone: string; onboarded: string; jurisdiction: string; accountManager: string;
   riskScore: number; lastReview: string; nextReview: string;
   alerts: AlertItem[]; cases: CaseRecord[];
   activity: { date: string; event: string; user: string }[];
+  onboarding?: OnboardingQuestionnaire;
 };
 
 export const clientDetails: Record<string, ClientDetail> = {

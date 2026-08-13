@@ -16,14 +16,14 @@ noting what's local-state-only vs. what would need real backend wiring.
 
 ## Shared building blocks referenced across these docs
 
-- `src/app/data.ts` — mock data, derived types (`Client`, `AlertItem`,
+- `../../backend/app/data.ts` — mock data, derived types (`Client`, `AlertItem`,
   `CaseRecord`, `ClientDetail`), and shared LOVs. Most of it is plain
   module-level constants; `clients`, `clientDetails`, and the case↔alert
   linkage are the exceptions — those get lifted into `App()` `useState` so
   they're actually mutable at runtime (see clientlist.md / cases.md).
-- `src/app/components/badges.tsx` — `SeverityBadge`, `RiskBadge`,
+- `../../backend/app/components/badges.tsx` — `SeverityBadge`, `RiskBadge`,
   `AlertStatusBadge`, `CasePriorityBadge`, `CaseStatusBadge`.
-- `src/app/components/Modal.tsx` — `Modal`, `ModalFooter`, `FormField`,
+- `../../backend/app/components/Modal.tsx` — `Modal`, `ModalFooter`, `FormField`,
   `inputClass`, reused by every create/edit form (Create Client, all of
   User Management's CRUD, Compliance Policies, Integrations, Attach Alerts).
 

@@ -7,7 +7,7 @@ import {
   AlertTriangle, Bell, BookOpen, Building2, ChevronRight,
   FileText, LayoutDashboard, LogOut, Search, Settings, Shield,
   TrendingUp, Users, X, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2,
-  AlertCircle, Filter, MoreHorizontal, Plus
+  AlertCircle, Filter, MoreHorizontal, UserPlus
 } from "lucide-react";
 import {
   alertsByDay, escalationsTrend, casesByStatus, clients as initialClients, recentAlerts,
@@ -17,7 +17,7 @@ import {
 } from "./data";
 import type { Client, ClientDetail } from "./data";
 import { SeverityBadge, RiskBadge, AlertStatusBadge, CasePriorityBadge, CaseStatusBadge } from "./components/badges";
-import { CreateClientModal, type NewClientPayload } from "./components/CreateClientModal";
+import { OnboardingPage, type NewClientPayload } from "./pages/OnboardingPage";
 import { CaseDetailPage } from "./pages/CaseDetailPage";
 import { LoginPage } from "./pages/LoginPage";
 import { UserManagementPage } from "./pages/admin/UserManagementPage";
@@ -638,26 +638,17 @@ function ClientOverviewPage({
 // ── Client List Page ──────────────────────────────────────────────────────────
 
 function ClientListPage({
-  clients, onClientSelect, onCreateClient,
-}: { clients: Client[]; onClientSelect: (id: string) => void; onCreateClient: (payload: NewClientPayload) => void }) {
+  clients, onClientSelect,
+}: { clients: Client[]; onClientSelect: (id: string) => void }) {
   const [search, setSearch] = useState("");
-  const [createOpen, setCreateOpen] = useState(false);
   const filtered = clients.filter(
     (c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.industry.toLowerCase().includes(search.toLowerCase())
   );
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Outfit', sans-serif" }}>Client List</h2>
-          <p className="text-sm text-gray-400 mt-0.5">{clients.length} monitored entities</p>
-        </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={14} /> Add Client
-        </button>
+      <div>
+        <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Outfit', sans-serif" }}>Client List</h2>
+        <p className="text-sm text-gray-400 mt-0.5">{clients.length} monitored entities</p>
       </div>
       <div className="bg-white rounded-xl border border-gray-100">
         <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
@@ -712,12 +703,6 @@ function ClientListPage({
           </tbody>
         </table>
       </div>
-
-      <CreateClientModal
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreate={(payload) => { onCreateClient(payload); setCreateOpen(false); }}
-      />
     </div>
   );
 }
@@ -1838,6 +1823,12 @@ const NAV: { key: string; label: string; icon: React.ElementType; badge?: string
   { key: "alerts",         label: "Alerts",          icon: Bell },
   { key: "cases",          label: "Cases",           icon: FileText },
   { key: "clients",        label: "Client List",     icon: Building2 },
+  { key: "onboarding",     label: "Onboarding",      icon: UserPlus },
+];
+
+// Rendered on the right side of the nav row, separated from the primary
+// section links above — it's a settings/admin destination, not a workflow.
+const NAV_RIGHT: { key: string; label: string; icon: React.ElementType; badge?: string }[] = [
   { key: "administration", label: "Administration",  icon: Settings },
 ];
 
@@ -1880,6 +1871,15 @@ export default function App() {
     handleClientSelect(id);
   }
 
+  // Existing-client path through Onboarding: the questionnaire was
+  // refreshed rather than a new client created, so update in place instead
+  // of appending.
+  function handleUpdateClientFromOnboarding(clientId: string, risk: string, detail: ClientDetail) {
+    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, risk } : c)));
+    setClientDetails((prev) => ({ ...prev, [clientId]: detail }));
+    handleClientSelect(clientId);
+  }
+
   function handleAttachAlerts(caseId: string, alertIds: string[]) {
     setCaseAlertLinks((prev) => ({
       ...prev,
@@ -1907,11 +1907,20 @@ export default function App() {
       case "dashboard":
         return <DashboardPage />;
       case "clients":
-        return <ClientListPage clients={clients} onClientSelect={handleClientSelect} onCreateClient={handleCreateClient} />;
+        return <ClientListPage clients={clients} onClientSelect={handleClientSelect} />;
       case "client-overview":
         return selectedClientId
           ? <ClientOverviewPage clientId={selectedClientId} clients={clients} clientDetails={clientDetails} onBack={handleClientBack} />
-          : <ClientListPage clients={clients} onClientSelect={handleClientSelect} onCreateClient={handleCreateClient} />;
+          : <ClientListPage clients={clients} onClientSelect={handleClientSelect} />;
+      case "onboarding":
+        return (
+          <OnboardingPage
+            clients={clients}
+            clientDetails={clientDetails}
+            onCreateClient={handleCreateClient}
+            onUpdateClient={handleUpdateClientFromOnboarding}
+          />
+        );
       case "administration":
         return renderAdminSection();
       case "alerts":
@@ -1929,7 +1938,7 @@ export default function App() {
     }
   }
 
-  const currentNav = NAV.find((n) => n.key === active);
+  const currentNav = NAV.find((n) => n.key === active) ?? NAV_RIGHT.find((n) => n.key === active);
 
   if (!isAuthenticated) {
     return <LoginPage onLogin={handleLogin} />;
@@ -2007,6 +2016,35 @@ export default function App() {
                   setAdminSection(null);
                 }}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${
+                  isActive
+                    ? "border-blue-500 text-white"
+                    : "border-transparent text-white/45 hover:text-white/75 hover:border-white/20"
+                }`}
+              >
+                <Icon size={15} className="flex-shrink-0" />
+                {label}
+                {badge && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? "bg-blue-500/40 text-white" : "bg-red-500 text-white"}`}>
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          {NAV_RIGHT.map(({ key, label, icon: Icon, badge }) => {
+            const isActive = active === key;
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  setActive(key);
+                  setSelectedClientId(null);
+                  setSelectedAlertId(null);
+                  setSelectedCaseId(null);
+                  setAdminSection(null);
+                }}
+                className={`ml-auto flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${
                   isActive
                     ? "border-blue-500 text-white"
                     : "border-transparent text-white/45 hover:text-white/75 hover:border-white/20"

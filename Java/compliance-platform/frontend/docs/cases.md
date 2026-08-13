@@ -12,11 +12,11 @@ for linking more alerts to a case.
 
 | File | Responsibility |
 |---|---|
-| `src/app/App.tsx` — `CasesPage` | Filterable/searchable case table; Case ID / title are now clickable. |
-| `src/app/pages/CaseDetailPage.tsx` | Case detail page + the alert-attach modal. |
-| `src/app/data.ts` | `allCases`, `CaseRecord` type, `initialCaseAlertLinks` (seed case↔alert links), `CASE_STATUSES`/`CASE_PRIORITIES`/`CASE_TYPES`. |
-| `src/app/components/badges.tsx` | `CasePriorityBadge`, `CaseStatusBadge` (also used by Client Overview's Cases tab). |
-| `src/app/components/Modal.tsx` | Shared `Modal`/`ModalFooter` wrapper used by the attach-alerts picker. |
+| `../../backend/app/App.tsx` — `CasesPage` | Filterable/searchable case table; Case ID / title are now clickable. |
+| `../../backend/app/pages/CaseDetailPage.tsx` | Case detail page + the alert-attach modal. |
+| `../../backend/app/data.ts` | `allCases`, `CaseRecord` type, `initialCaseAlertLinks` (seed case↔alert links), `CASE_STATUSES`/`CASE_PRIORITIES`/`CASE_TYPES`. |
+| `../../backend/app/components/badges.tsx` | `CasePriorityBadge`, `CaseStatusBadge` (also used by Client Overview's Cases tab). |
+| `../../backend/app/components/Modal.tsx` | Shared `Modal`/`ModalFooter` wrapper used by the attach-alerts picker. |
 
 ## The case ↔ alert link, and why it needed new state
 

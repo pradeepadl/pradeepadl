@@ -12,8 +12,8 @@ the platform's current mock/demo status (see [Known Limitations](#known-limitati
 
 | File | Responsibility |
 |---|---|
-| `src/app/pages/LoginPage.tsx` | The entire login screen — form, validation, theming. |
-| `src/app/App.tsx` (`App()`) | Owns the `isAuthenticated` gate and renders `LoginPage` when signed out. |
+| `../../backend/app/pages/LoginPage.tsx` | The entire login screen — form, validation, theming. |
+| `../../backend/app/App.tsx` (`App()`) | Owns the `isAuthenticated` gate and renders `LoginPage` when signed out. |
 
 ## Component
 

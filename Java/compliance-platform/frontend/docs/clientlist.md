@@ -11,10 +11,10 @@ client. Both live in `App.tsx`; the create-client modal is its own file.
 
 | File | Responsibility |
 |---|---|
-| `src/app/App.tsx` — `ClientListPage` | Table, search, "Add Client" trigger. |
-| `src/app/App.tsx` — `ClientOverviewPage` | 7-tab client detail page. |
-| `src/app/components/CreateClientModal.tsx` | The "Add Client" modal form. |
-| `src/app/data.ts` | `clients` (seed list), `clientDetails` (seed detail records), `Client`/`ClientDetail` types, `nextClientId()`. |
+| `../../backend/app/App.tsx` — `ClientListPage` | Table, search, "Add Client" trigger. |
+| `../../backend/app/App.tsx` — `ClientOverviewPage` | 7-tab client detail page. |
+| `../../backend/app/components/CreateClientModal.tsx` | The "Add Client" modal form. |
+| `../../backend/app/data.ts` | `clients` (seed list), `clientDetails` (seed detail records), `Client`/`ClientDetail` types, `nextClientId()`. |
 
 ## State ownership
 

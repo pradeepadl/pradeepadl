@@ -12,10 +12,10 @@ alert data (see [cases.md](cases.md)) and it's the natural counterpart page.
 
 | File | Responsibility |
 |---|---|
-| `src/app/App.tsx` — `AlertsPage` | Filterable/searchable alert table. |
-| `src/app/App.tsx` — `AlertDetailPage` | Alert detail: summary + rules tabs. |
-| `src/app/data.ts` | `allAlerts`, `AlertItem` type, `STATUS_LOV`, `SEVERITY_LOV`, `ALERT_CATEGORIES`. |
-| `src/app/components/badges.tsx` | `SeverityBadge`, `AlertStatusBadge` (shared with Cases/Dashboard/Client Overview). |
+| `../../backend/app/App.tsx` — `AlertsPage` | Filterable/searchable alert table. |
+| `../../backend/app/App.tsx` — `AlertDetailPage` | Alert detail: summary + rules tabs. |
+| `../../backend/app/data.ts` | `allAlerts`, `AlertItem` type, `STATUS_LOV`, `SEVERITY_LOV`, `ALERT_CATEGORIES`. |
+| `../../backend/app/components/badges.tsx` | `SeverityBadge`, `AlertStatusBadge` (shared with Cases/Dashboard/Client Overview). |
 
 `allAlerts` (in `data.ts`) is a **plain module-level constant**, not lifted
 to `App()` state — unlike `clients`/`caseAlertLinks`. Nothing in the current
