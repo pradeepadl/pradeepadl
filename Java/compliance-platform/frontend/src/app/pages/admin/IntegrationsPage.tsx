@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronRight, Settings2, CheckCircle2 } from "lucide-react";
 import { Modal, ModalFooter, FormField, inputClass } from "../../components/Modal";
+import { AiModelProviderPanel } from "../../components/AiModelProviderPanel";
 
 type Integration = {
   id: string; name: string; category: string; description: string;
@@ -43,6 +44,8 @@ export function IntegrationsPage({ onBack }: { onBack: () => void }) {
         <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Outfit', sans-serif" }}>Integrations</h2>
         <p className="text-sm text-gray-400 mt-0.5">{integrations.filter((i) => i.enabled).length} of {integrations.length} connections active</p>
       </div>
+
+      <AiModelProviderPanel />
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {integrations.map((i) => (

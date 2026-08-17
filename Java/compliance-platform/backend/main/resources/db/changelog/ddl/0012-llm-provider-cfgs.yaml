@@ -1,0 +1,93 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0012-01-create-tcfg-llm-provider-cfgs
+      author: cddp
+      comment: >
+        Backs the admin Integrations page's "AI Model Provider" panel:
+        pick a provider (CLAUDE/GEMINI/HUGGINGFACE), save its API key, and
+        the Python AI agent service resolves it at request time via
+        AiAgentJob.tenant_id -> InternalLlmConfigController (see
+        pySDK/sdk/cddp_ai_sdk/llm/factory.py and config/llm_config_client.py).
+        api_key_encrypted is ciphertext (AES-GCM, see
+        com.cddp.ai.crypto.ApiKeyCipher) — never store the raw key.
+        provider is plain varchar + CHECK rather than a native Postgres
+        enum, deliberately: the case_status/aml_status_type native enums
+        elsewhere in this schema need extra Hibernate type-mapping
+        machinery for an admin-editable CRUD table, which this doesn't
+        justify (see CaseLookupRepository's comment on the same trade-off).
+      changes:
+        - createTable:
+            tableName: tcfg_llm_provider_cfgs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tcfg_llm_provider_cfgs_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: provider
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_name
+                  type: VARCHAR(100)
+              - column:
+                  name: api_key_encrypted
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE tcfg_llm_provider_cfgs
+              ADD CONSTRAINT ck_tcfg_llm_provider_cfgs_provider
+              CHECK (provider IN ('CLAUDE', 'GEMINI', 'HUGGINGFACE'));
+        - addUniqueConstraint:
+            tableName: tcfg_llm_provider_cfgs
+            columnNames: tenant_id, provider
+            constraintName: uk_tcfg_llm_provider_cfgs_tenant_provider
+        - sql:
+            sql: >
+              CREATE UNIQUE INDEX ux_tcfg_llm_provider_cfgs_one_active_per_tenant
+              ON tcfg_llm_provider_cfgs (tenant_id) WHERE is_active;
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS ux_tcfg_llm_provider_cfgs_one_active_per_tenant;
+        - sql:
+            sql: ALTER TABLE tcfg_llm_provider_cfgs DROP CONSTRAINT IF EXISTS ck_tcfg_llm_provider_cfgs_provider;

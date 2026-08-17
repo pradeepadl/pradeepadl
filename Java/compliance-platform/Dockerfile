@@ -6,7 +6,7 @@ COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw && ./mvnw -B dependency:go-offline
 
-COPY backend ./src
+COPY backend ./backend
 RUN ./mvnw -B clean package -DskipTests
 
 # ── Run stage ────────────────────────────────────────────────────────────────

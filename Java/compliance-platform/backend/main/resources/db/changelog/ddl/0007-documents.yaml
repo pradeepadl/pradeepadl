@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0007-01-create-tmstr-documents
+      author: cddp
+      comment: >
+        alert_id has no FK — no Alerts module exists yet in this schema.
+        case_id is added later by 0009-cases.yaml once tmstr_cases exists.
+      changes:
+        - createTable:
+            tableName: tmstr_documents
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tmstr_documents_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: client_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tmstr_documents_client
+                    references: tsub_client_details(id)
+              - column:
+                  name: alert_id
+                  type: UUID
+              - column:
+                  name: filename
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: storage_path
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: document_status
+                  type: VARCHAR(30)
+                  defaultValue: PENDING
+              - column:
+                  name: scan_status
+                  type: VARCHAR(30)
+                  defaultValue: PENDING
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+        - createIndex:
+            indexName: ix_tmstr_documents_tenant_id
+            tableName: tmstr_documents
+            columns:
+              - column:
+                  name: tenant_id
+        - createIndex:
+            indexName: ix_tmstr_documents_client_id
+            tableName: tmstr_documents
+            columns:
+              - column:
+                  name: client_id

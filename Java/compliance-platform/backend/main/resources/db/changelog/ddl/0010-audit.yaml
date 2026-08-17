@@ -1,0 +1,147 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0010-01-create-tadt-audit-logs
+      author: cddp
+      comment: Insert-only row-history log — action_ts is the event timestamp.
+      changes:
+        - createTable:
+            tableName: tadt_audit_logs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tadt_audit_logs_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: table_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: record_id
+                  type: UUID
+              - column:
+                  name: action
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: column_name
+                  type: VARCHAR(100)
+              - column:
+                  name: old_value
+                  type: TEXT
+              - column:
+                  name: new_value
+                  type: TEXT
+              - column:
+                  name: old_row_json
+                  type: JSONB
+              - column:
+                  name: new_row_json
+                  type: JSONB
+              - column:
+                  name: change_reason
+                  type: VARCHAR(255)
+              - column:
+                  name: trace_id
+                  type: VARCHAR(100)
+              - column:
+                  name: action_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tadt_audit_logs_tenant_id
+            tableName: tadt_audit_logs
+            columns:
+              - column:
+                  name: tenant_id
+        - createIndex:
+            indexName: ix_tadt_audit_logs_table_record
+            tableName: tadt_audit_logs
+            columns:
+              - column:
+                  name: table_name
+              - column:
+                  name: record_id
+
+  - changeSet:
+      id: 0010-02-create-tlog-process-logs
+      author: cddp
+      comment: Insert-only process/trace log — started_at is the event timestamp.
+      changes:
+        - createTable:
+            tableName: tlog_process_logs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tlog_process_logs_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: event_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_category
+                  type: VARCHAR(50)
+              - column:
+                  name: event_status
+                  type: VARCHAR(30)
+              - column:
+                  name: correlation_id
+                  type: VARCHAR(100)
+              - column:
+                  name: parent_correlation_id
+                  type: VARCHAR(100)
+              - column:
+                  name: event_data
+                  type: JSONB
+              - column:
+                  name: result_data
+                  type: JSONB
+              - column:
+                  name: error_message
+                  type: TEXT
+              - column:
+                  name: duration_ms
+                  type: BIGINT
+              - column:
+                  name: started_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tlog_process_logs_tenant_id
+            tableName: tlog_process_logs
+            columns:
+              - column:
+                  name: tenant_id
+        - createIndex:
+            indexName: ix_tlog_process_logs_correlation_id
+            tableName: tlog_process_logs
+            columns:
+              - column:
+                  name: correlation_id

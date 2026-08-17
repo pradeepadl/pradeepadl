@@ -1,0 +1,367 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0002-01-seed-tlkp-regions
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_regions
+            columns:
+              - column: { name: regn_cd, value: NA }
+              - column: { name: regn_nm, value: North America }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 10 }
+        - insert:
+            tableName: tlkp_regions
+            columns:
+              - column: { name: regn_cd, value: LATAM }
+              - column: { name: regn_nm, value: Latin America & Caribbean }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 20 }
+        - insert:
+            tableName: tlkp_regions
+            columns:
+              - column: { name: regn_cd, value: EMEA }
+              - column: { name: regn_nm, value: "Europe, Middle East & Africa" }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 30 }
+        - insert:
+            tableName: tlkp_regions
+            columns:
+              - column: { name: regn_cd, value: APAC }
+              - column: { name: regn_nm, value: Asia Pacific }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 40 }
+
+  - changeSet:
+      id: 0002-02-seed-tlkp-countries
+      author: cddp
+      comment: >
+        Representative subset, not the full ISO-3166 list — load the
+        complete country table via a dedicated reference-data import before
+        relying on this for production address/identifier capture.
+      changes:
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: US }
+              - column: { name: code_alpha3, value: USA }
+              - column: { name: name, value: United States }
+              - column: { name: numerc_cd, value: "840" }
+              - column: { name: regn_cd, value: NA }
+              - column: { name: risk_rtg, value: LOW }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: CA }
+              - column: { name: code_alpha3, value: CAN }
+              - column: { name: name, value: Canada }
+              - column: { name: numerc_cd, value: "124" }
+              - column: { name: regn_cd, value: NA }
+              - column: { name: risk_rtg, value: LOW }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: MX }
+              - column: { name: code_alpha3, value: MEX }
+              - column: { name: name, value: Mexico }
+              - column: { name: numerc_cd, value: "484" }
+              - column: { name: regn_cd, value: LATAM }
+              - column: { name: risk_rtg, value: MEDIUM }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: BR }
+              - column: { name: code_alpha3, value: BRA }
+              - column: { name: name, value: Brazil }
+              - column: { name: numerc_cd, value: "076" }
+              - column: { name: regn_cd, value: LATAM }
+              - column: { name: risk_rtg, value: MEDIUM }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: GB }
+              - column: { name: code_alpha3, value: GBR }
+              - column: { name: name, value: United Kingdom }
+              - column: { name: numerc_cd, value: "826" }
+              - column: { name: regn_cd, value: EMEA }
+              - column: { name: risk_rtg, value: LOW }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: DE }
+              - column: { name: code_alpha3, value: DEU }
+              - column: { name: name, value: Germany }
+              - column: { name: numerc_cd, value: "276" }
+              - column: { name: regn_cd, value: EMEA }
+              - column: { name: risk_rtg, value: LOW }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: AE }
+              - column: { name: code_alpha3, value: ARE }
+              - column: { name: name, value: United Arab Emirates }
+              - column: { name: numerc_cd, value: "784" }
+              - column: { name: regn_cd, value: EMEA }
+              - column: { name: risk_rtg, value: HIGH }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: SG }
+              - column: { name: code_alpha3, value: SGP }
+              - column: { name: name, value: Singapore }
+              - column: { name: numerc_cd, value: "702" }
+              - column: { name: regn_cd, value: APAC }
+              - column: { name: risk_rtg, value: LOW }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: JP }
+              - column: { name: code_alpha3, value: JPN }
+              - column: { name: name, value: Japan }
+              - column: { name: numerc_cd, value: "392" }
+              - column: { name: regn_cd, value: APAC }
+              - column: { name: risk_rtg, value: LOW }
+        - insert:
+            tableName: tlkp_countries
+            columns:
+              - column: { name: ctry_cd, value: IN }
+              - column: { name: code_alpha3, value: IND }
+              - column: { name: name, value: India }
+              - column: { name: numerc_cd, value: "356" }
+              - column: { name: regn_cd, value: APAC }
+              - column: { name: risk_rtg, value: MEDIUM }
+
+  - changeSet:
+      id: 0002-03-seed-tlkp-nm-typs
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_nm_typs
+            columns:
+              - column: { name: cd, value: LEGAL }
+              - column: { name: nm, value: Legal name }
+              - column: { name: srt_ord, valueNumeric: 10 }
+        - insert:
+            tableName: tlkp_nm_typs
+            columns:
+              - column: { name: cd, value: AKA }
+              - column: { name: nm, value: Also known as }
+              - column: { name: srt_ord, valueNumeric: 20 }
+        - insert:
+            tableName: tlkp_nm_typs
+            columns:
+              - column: { name: cd, value: DBA }
+              - column: { name: nm, value: Doing business as }
+              - column: { name: srt_ord, valueNumeric: 30 }
+        - insert:
+            tableName: tlkp_nm_typs
+            columns:
+              - column: { name: cd, value: FORMER }
+              - column: { name: nm, value: Former name }
+              - column: { name: srt_ord, valueNumeric: 40 }
+
+  - changeSet:
+      id: 0002-04-seed-tlkp-id-type
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_id_type
+            columns:
+              - column: { name: cd, value: PASSPORT }
+              - column: { name: nm, value: Passport }
+              - column: { name: appl_to_prty_typ, value: INDIVIDUAL }
+              - column: { name: is_uniq_per_prty, valueBoolean: false }
+              - column: { name: has_expiry, valueBoolean: true }
+        - insert:
+            tableName: tlkp_id_type
+            columns:
+              - column: { name: cd, value: NATIONAL_ID }
+              - column: { name: nm, value: National ID }
+              - column: { name: appl_to_prty_typ, value: INDIVIDUAL }
+              - column: { name: is_uniq_per_prty, valueBoolean: false }
+              - column: { name: has_expiry, valueBoolean: true }
+        - insert:
+            tableName: tlkp_id_type
+            columns:
+              - column: { name: cd, value: TAX_ID }
+              - column: { name: nm, value: Tax identification number }
+              - column: { name: appl_to_prty_typ, value: BOTH }
+              - column: { name: is_uniq_per_prty, valueBoolean: true }
+              - column: { name: has_expiry, valueBoolean: false }
+        - insert:
+            tableName: tlkp_id_type
+            columns:
+              - column: { name: cd, value: REGISTRATION_NUM }
+              - column: { name: nm, value: Company registration number }
+              - column: { name: appl_to_prty_typ, value: ORGANIZATION }
+              - column: { name: is_uniq_per_prty, valueBoolean: true }
+              - column: { name: has_expiry, valueBoolean: false }
+        - insert:
+            tableName: tlkp_id_type
+            columns:
+              - column: { name: cd, value: LEI }
+              - column: { name: nm, value: Legal Entity Identifier }
+              - column: { name: appl_to_prty_typ, value: ORGANIZATION }
+              - column: { name: is_uniq_per_prty, valueBoolean: true }
+              - column: { name: has_expiry, valueBoolean: true }
+
+  - changeSet:
+      id: 0002-05-seed-tlkp-addr-typ
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_addr_typ
+            columns:
+              - column: { name: cd, value: RESIDENTIAL }
+              - column: { name: nm, value: Residential }
+              - column: { name: srt_ord, valueNumeric: 10 }
+        - insert:
+            tableName: tlkp_addr_typ
+            columns:
+              - column: { name: cd, value: MAILING }
+              - column: { name: nm, value: Mailing }
+              - column: { name: srt_ord, valueNumeric: 20 }
+        - insert:
+            tableName: tlkp_addr_typ
+            columns:
+              - column: { name: cd, value: REGISTERED }
+              - column: { name: nm, value: Registered office }
+              - column: { name: srt_ord, valueNumeric: 30 }
+        - insert:
+            tableName: tlkp_addr_typ
+            columns:
+              - column: { name: cd, value: BUSINESS }
+              - column: { name: nm, value: Business / principal place }
+              - column: { name: srt_ord, valueNumeric: 40 }
+
+  - changeSet:
+      id: 0002-06-seed-tlkp-cntc-typs
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_cntc_typs
+            columns:
+              - column: { name: cd, value: EMAIL }
+              - column: { name: nm, value: Email }
+              - column: { name: srt_ord, valueNumeric: 10 }
+        - insert:
+            tableName: tlkp_cntc_typs
+            columns:
+              - column: { name: cd, value: PHONE }
+              - column: { name: nm, value: Phone }
+              - column: { name: srt_ord, valueNumeric: 20 }
+        - insert:
+            tableName: tlkp_cntc_typs
+            columns:
+              - column: { name: cd, value: MOBILE }
+              - column: { name: nm, value: Mobile }
+              - column: { name: srt_ord, valueNumeric: 30 }
+        - insert:
+            tableName: tlkp_cntc_typs
+            columns:
+              - column: { name: cd, value: FAX }
+              - column: { name: nm, value: Fax }
+              - column: { name: srt_ord, valueNumeric: 40 }
+
+  - changeSet:
+      id: 0002-07-seed-tlkp-relnshp-type
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_relnshp_type
+            columns:
+              - column: { name: cd, value: BENEFICIAL_OWNER }
+              - column: { name: nm, value: Beneficial owner }
+              - column: { name: has_ownrshp_pct, valueBoolean: true }
+              - column: { name: is_actv, valueBoolean: true }
+        - insert:
+            tableName: tlkp_relnshp_type
+            columns:
+              - column: { name: cd, value: AUTHORIZED_SIGNER }
+              - column: { name: nm, value: Authorized signer }
+              - column: { name: has_ownrshp_pct, valueBoolean: false }
+              - column: { name: is_actv, valueBoolean: true }
+        - insert:
+            tableName: tlkp_relnshp_type
+            columns:
+              - column: { name: cd, value: DIRECTOR }
+              - column: { name: nm, value: Director / officer }
+              - column: { name: has_ownrshp_pct, valueBoolean: false }
+              - column: { name: is_actv, valueBoolean: true }
+        - insert:
+            tableName: tlkp_relnshp_type
+            columns:
+              - column: { name: cd, value: PARENT_SUBSIDIARY }
+              - column: { name: nm, value: Parent / subsidiary }
+              - column: { name: has_ownrshp_pct, valueBoolean: true }
+              - column: { name: is_actv, valueBoolean: true }
+
+  - changeSet:
+      id: 0002-08-seed-tlkp-risk-lctr-type
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_risk_lctr_type
+            columns:
+              - column: { name: typ_cd, value: GEOGRAPHIC }
+              - column: { name: typ_nm, value: Geographic risk }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 10 }
+        - insert:
+            tableName: tlkp_risk_lctr_type
+            columns:
+              - column: { name: typ_cd, value: PRODUCT }
+              - column: { name: typ_nm, value: Product / service risk }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 20 }
+        - insert:
+            tableName: tlkp_risk_lctr_type
+            columns:
+              - column: { name: typ_cd, value: CHANNEL }
+              - column: { name: typ_nm, value: Delivery channel risk }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 30 }
+        - insert:
+            tableName: tlkp_risk_lctr_type
+            columns:
+              - column: { name: typ_cd, value: CUSTOMER }
+              - column: { name: typ_nm, value: Customer type risk }
+              - column: { name: is_actv, valueBoolean: true }
+              - column: { name: srt_ord, valueNumeric: 40 }
+
+  - changeSet:
+      id: 0002-09-seed-tlkp-doc-typs
+      author: cddp
+      changes:
+        - insert:
+            tableName: tlkp_doc_typs
+            columns:
+              - column: { name: cd, value: PASSPORT_SCAN }
+              - column: { name: nm, value: Passport scan }
+              - column: { name: allowed_mime_types, value: "image/jpeg,image/png,application/pdf" }
+              - column: { name: max_size_bytes, valueNumeric: 10485760 }
+              - column: { name: has_expiry, valueBoolean: true }
+        - insert:
+            tableName: tlkp_doc_typs
+            columns:
+              - column: { name: cd, value: PROOF_OF_ADDRESS }
+              - column: { name: nm, value: Proof of address }
+              - column: { name: allowed_mime_types, value: "image/jpeg,image/png,application/pdf" }
+              - column: { name: max_size_bytes, valueNumeric: 10485760 }
+              - column: { name: has_expiry, valueBoolean: true }
+        - insert:
+            tableName: tlkp_doc_typs
+            columns:
+              - column: { name: cd, value: INCORPORATION_CERT }
+              - column: { name: nm, value: Certificate of incorporation }
+              - column: { name: allowed_mime_types, value: application/pdf }
+              - column: { name: max_size_bytes, valueNumeric: 20971520 }
+              - column: { name: has_expiry, valueBoolean: false }
+        - insert:
+            tableName: tlkp_doc_typs
+            columns:
+              - column: { name: cd, value: BENEFICIAL_OWNERSHIP_DECL }
+              - column: { name: nm, value: Beneficial ownership declaration }
+              - column: { name: allowed_mime_types, value: application/pdf }
+              - column: { name: max_size_bytes, valueNumeric: 20971520 }
+              - column: { name: has_expiry, valueBoolean: false }

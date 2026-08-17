@@ -1,0 +1,490 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0005-01-create-tmstr-parties
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tmstr_parties
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tmstr_parties_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: prty_typ
+                  type: party_type
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: extrnl_refnc_id
+                  type: VARCHAR(100)
+              - column:
+                  name: srce_sys
+                  type: VARCHAR(30)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deld_ts
+                  type: TIMESTAMP
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+        - createIndex:
+            indexName: ix_tmstr_parties_tenant_id
+            tableName: tmstr_parties
+            columns:
+              - column:
+                  name: tenant_id
+
+  - changeSet:
+      id: 0005-02-create-tsub-individual-details
+      author: cddp
+      comment: 1:1 subtype of tmstr_parties — PK is the FK, no surrogate key.
+      changes:
+        - createTable:
+            tableName: tsub_individual_details
+            columns:
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_tsub_individual_details_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: sltn
+                  type: VARCHAR(10)
+              - column:
+                  name: first_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mid_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dob
+                  type: DATE
+              - column:
+                  name: gndr
+                  type: VARCHAR(10)
+              - column:
+                  name: ntlty
+                  type: VARCHAR(60)
+              - column:
+                  name: citizenship
+                  type: VARCHAR(60)
+              - column:
+                  name: is_pep
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_sanctnd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 0005-03-create-tsub-organization-details
+      author: cddp
+      comment: 1:1 subtype of tmstr_parties — PK is the FK, no surrogate key.
+      changes:
+        - createTable:
+            tableName: tsub_organization_details
+            columns:
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_tsub_organization_details_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: enty_typ
+                  type: VARCHAR(50)
+              - column:
+                  name: is_pep
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_sve
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_sdn_mnrty
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: inc_ctry
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_tsub_organization_details_ctry
+                    references: tlkp_countries(ctry_cd)
+
+  - changeSet:
+      id: 0005-04-create-tsub-party-names
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_party_names
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_party_names_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: nm_typ_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    foreignKeyName: fk_tsub_party_names_typ
+                    references: tlkp_nm_typs(cd)
+              - column:
+                  name: nm_val
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_curr
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: vld_from
+                  type: DATE
+              - column:
+                  name: vld_to
+                  type: DATE
+        - createIndex:
+            indexName: ix_tsub_party_names_prty_id
+            tableName: tsub_party_names
+            columns:
+              - column:
+                  name: prty_id
+
+  - changeSet:
+      id: 0005-05-create-tsub-party-identifiers
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_party_identifiers
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_party_identifiers_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: id_typ_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    foreignKeyName: fk_tsub_party_identifiers_typ
+                    references: tlkp_id_type(cd)
+              - column:
+                  name: id_val
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issg_ctry
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_tsub_party_identifiers_ctry
+                    references: tlkp_countries(ctry_cd)
+              - column:
+                  name: issd_dt
+                  type: DATE
+              - column:
+                  name: expiry_dt
+                  type: DATE
+              - column:
+                  name: is_vrfd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tsub_party_identifiers_prty_id
+            tableName: tsub_party_identifiers
+            columns:
+              - column:
+                  name: prty_id
+
+  - changeSet:
+      id: 0005-06-create-tsub-party-contacts
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_party_contacts
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_party_contacts_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: cntc_typ_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    foreignKeyName: fk_tsub_party_contacts_typ
+                    references: tlkp_cntc_typs(cd)
+              - column:
+                  name: cntc_val
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_prmy
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_vrfd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tsub_party_contacts_prty_id
+            tableName: tsub_party_contacts
+            columns:
+              - column:
+                  name: prty_id
+
+  - changeSet:
+      id: 0005-07-create-tsub-party-addresses
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_party_addresses
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_party_addresses_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: addr_typ_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    foreignKeyName: fk_tsub_party_addresses_typ
+                    references: tlkp_addr_typ(cd)
+              - column:
+                  name: addr_ln_1
+                  type: VARCHAR(200)
+              - column:
+                  name: city
+                  type: VARCHAR(100)
+              - column:
+                  name: st_prvnc
+                  type: VARCHAR(100)
+              - column:
+                  name: pstl_cd
+                  type: VARCHAR(20)
+              - column:
+                  name: ctry_cd
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_tsub_party_addresses_ctry
+                    references: tlkp_countries(ctry_cd)
+              - column:
+                  name: is_prmy
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tsub_party_addresses_prty_id
+            tableName: tsub_party_addresses
+            columns:
+              - column:
+                  name: prty_id
+
+  - changeSet:
+      id: 0005-08-create-trel-party-relationships
+      author: cddp
+      comment: >
+        root_clnt_id intentionally has no FK yet — TSUB_CLIENT_DETAILS
+        doesn't exist until 0006-client.yaml, which adds the constraint via
+        a deferred ALTER TABLE once the target table is in place.
+      changes:
+        - createTable:
+            tableName: trel_party_relationships
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trel_party_rel_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: root_clnt_id
+                  type: UUID
+              - column:
+                  name: subs_prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trel_party_rel_subs_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: reld_prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_trel_party_rel_reld_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: relnshp_typ_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    foreignKeyName: fk_trel_party_rel_typ
+                    references: tlkp_relnshp_type(cd)
+              - column:
+                  name: ownrshp_pct
+                  type: DECIMAL(5,2)
+              - column:
+                  name: ttl
+                  type: VARCHAR(100)
+              - column:
+                  name: depth_lvl
+                  type: SMALLINT
+              - column:
+                  name: is_circular_flgd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: eff_from
+                  type: DATE
+              - column:
+                  name: eff_to
+                  type: DATE
+              - column:
+                  name: is_scmd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_scmd_at
+                  type: TIMESTAMP
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_trel_party_rel_root_clnt_id
+            tableName: trel_party_relationships
+            columns:
+              - column:
+                  name: root_clnt_id
+        - createIndex:
+            indexName: ix_trel_party_rel_subs_prty_id
+            tableName: trel_party_relationships
+            columns:
+              - column:
+                  name: subs_prty_id
+        - createIndex:
+            indexName: ix_trel_party_rel_reld_prty_id
+            tableName: trel_party_relationships
+            columns:
+              - column:
+                  name: reld_prty_id

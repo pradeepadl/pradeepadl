@@ -3,6 +3,7 @@ import { ChevronRight, Search, X, Paperclip, Trash2 } from "lucide-react";
 import { allCases, allAlerts, CASE_STATUSES } from "../data";
 import { SeverityBadge, AlertStatusBadge, CaseStatusBadge, CasePriorityBadge } from "../components/badges";
 import { Modal, ModalFooter } from "../components/Modal";
+import { AiWiringCheckPanel } from "../components/AiWiringCheckPanel";
 
 export function CaseDetailPage({
   caseId, attachedAlertIds, onAttachAlerts, onRemoveAlert, onBack,
@@ -85,13 +86,16 @@ export function CaseDetailPage({
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col gap-4">
-          <div className="text-sm font-semibold text-gray-700" style={{ fontFamily: "'Outfit', sans-serif" }}>Investigation Summary</div>
-          <p className="text-xs text-gray-500 leading-relaxed">
-            {attachedAlerts.length === 0
-              ? "No alerts are currently linked to this case. Attach related alerts below to build the investigation record."
-              : `${attachedAlerts.length} alert${attachedAlerts.length !== 1 ? "s" : ""} linked for investigation, spanning ${new Set(attachedAlerts.map((a) => a.category)).size} rule categor${new Set(attachedAlerts.map((a) => a.category)).size !== 1 ? "ies" : "y"}.`}
-          </p>
+        <div className="flex flex-col gap-4">
+          <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col gap-4">
+            <div className="text-sm font-semibold text-gray-700" style={{ fontFamily: "'Outfit', sans-serif" }}>Investigation Summary</div>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              {attachedAlerts.length === 0
+                ? "No alerts are currently linked to this case. Attach related alerts below to build the investigation record."
+                : `${attachedAlerts.length} alert${attachedAlerts.length !== 1 ? "s" : ""} linked for investigation, spanning ${new Set(attachedAlerts.map((a) => a.category)).size} rule categor${new Set(attachedAlerts.map((a) => a.category)).size !== 1 ? "ies" : "y"}.`}
+            </p>
+          </div>
+          <AiWiringCheckPanel />
         </div>
       </div>
 

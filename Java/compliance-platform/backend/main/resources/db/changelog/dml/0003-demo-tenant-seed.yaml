@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0003-01-seed-demo-tenant
+      author: cddp
+      comment: >
+        Fixed-UUID demo tenant so the frontend's AiWiringCheckPanel and
+        AiModelProviderPanel (both admin/dev-only panels) have a real
+        tmstr_tenants row to point VITE_DEMO_TENANT_ID at. The UUID is
+        hardcoded (not gen_random_uuid()) specifically so it's stable
+        across environments/rebuilds and can be baked into the frontend
+        build via docker-compose.deploy.yml's build arg — see that file's
+        frontend service and frontend/Dockerfile.
+      changes:
+        - insert:
+            tableName: tmstr_tenants
+            columns:
+              - column: { name: id, value: "403d8aad-2cf9-435a-8d4d-92ea414f9e97" }
+              - column: { name: tenant_cd, value: DEMO }
+              - column: { name: tenant_nm, value: "Demo Tenant" }
+              - column: { name: tenant_typ, value: DEMO }
+              - column: { name: is_actv, valueBoolean: true }

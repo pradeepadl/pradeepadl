@@ -1,0 +1,299 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0008-01-create-tmstr-onboarding-cases
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tmstr_onboarding_cases
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tmstr_onboarding_cases_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: client_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tmstr_onboarding_cases_client
+                    references: tsub_client_details(id)
+              - column:
+                  name: case_num
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tmstr_onboarding_cases_num
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: OPEN
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+        - createIndex:
+            indexName: ix_tmstr_onboarding_cases_client_id
+            tableName: tmstr_onboarding_cases
+            columns:
+              - column:
+                  name: client_id
+
+  - changeSet:
+      id: 0008-02-create-tlog-duplicate-checks
+      author: cddp
+      comment: >
+        onboarding_case_id makes the ERD's "triggers" relationship from
+        tmstr_onboarding_cases explicit — the ERD field list omitted it.
+        matchd_clnt_id has no FK: the ERD draws no constraint marker on it,
+        and a matched candidate may not resolve to an existing client row.
+      changes:
+        - createTable:
+            tableName: tlog_duplicate_checks
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tlog_duplicate_checks_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: onboarding_case_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tlog_duplicate_checks_onboarding
+                    references: tmstr_onboarding_cases(id)
+              - column:
+                  name: corr_id
+                  type: VARCHAR(100)
+              - column:
+                  name: incmg_clnt_nm
+                  type: VARCHAR(200)
+              - column:
+                  name: incmg_ctry
+                  type: CHAR(2)
+              - column:
+                  name: incmg_bid
+                  type: VARCHAR(100)
+              - column:
+                  name: mtch_fnd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mtch_typ
+                  type: VARCHAR(30)
+              - column:
+                  name: mtch_crdc
+                  type: DECIMAL(5,2)
+              - column:
+                  name: matchd_clnt_id
+                  type: UUID
+              - column:
+                  name: matchd_clnt_sta
+                  type: VARCHAR(30)
+              - column:
+                  name: actn_tkn
+                  type: VARCHAR(50)
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+        - createIndex:
+            indexName: ix_tlog_duplicate_checks_onboarding_case_id
+            tableName: tlog_duplicate_checks
+            columns:
+              - column:
+                  name: onboarding_case_id
+        - createIndex:
+            indexName: ix_tlog_duplicate_checks_corr_id
+            tableName: tlog_duplicate_checks
+            columns:
+              - column:
+                  name: corr_id
+
+  - changeSet:
+      id: 0008-03-create-tsub-duplicate-idempotency
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_duplicate_idempotency
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_duplicate_idempotency_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: corr_id
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tsub_duplicate_idempotency_corr
+              - column:
+                  name: dup_chk_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tsub_duplicate_idempotency_chk
+                    references: tlog_duplicate_checks(id)
+              - column:
+                  name: http_status
+                  type: SMALLINT
+              - column:
+                  name: response_payload
+                  type: JSONB
+              - column:
+                  name: replay_count
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP
+
+  - changeSet:
+      id: 0008-04-create-tsub-duplicate-resolutions
+      author: cddp
+      comment: >
+        matched_client_id / resolved_client_id have no FK — the ERD draws
+        no constraint marker on either column.
+      changes:
+        - createTable:
+            tableName: tsub_duplicate_resolutions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_duplicate_resolutions_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: dup_chk_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tsub_duplicate_resolutions_chk
+                    references: tlog_duplicate_checks(id)
+              - column:
+                  name: request_payload
+                  type: JSONB
+              - column:
+                  name: matched_client_id
+                  type: UUID
+              - column:
+                  name: match_score
+                  type: DECIMAL(5,2)
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: PENDING
+              - column:
+                  name: resolved_client_id
+                  type: UUID
+              - column:
+                  name: resolved_by
+                  type: VARCHAR(100)
+              - column:
+                  name: resolved_ts
+                  type: TIMESTAMP
+              - column:
+                  name: resolution_note
+                  type: VARCHAR(500)
+              - column:
+                  name: vclm_req_num
+                  type: VARCHAR(50)
+              - column:
+                  name: sla_due_ts
+                  type: TIMESTAMP
+              - column:
+                  name: escalation_level
+                  type: SMALLINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_escalated_ts
+                  type: TIMESTAMP
+              - column:
+                  name: second_escalated_ts
+                  type: TIMESTAMP
+              - column:
+                  name: expired_ts
+                  type: TIMESTAMP
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tsub_duplicate_resolutions_dup_chk_id
+            tableName: tsub_duplicate_resolutions
+            columns:
+              - column:
+                  name: dup_chk_id
+        - sql:
+            sql: >
+              CREATE INDEX ix_tsub_duplicate_resolutions_req_payload_gin
+              ON tsub_duplicate_resolutions USING GIN (request_payload);
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS ix_tsub_duplicate_resolutions_req_payload_gin;

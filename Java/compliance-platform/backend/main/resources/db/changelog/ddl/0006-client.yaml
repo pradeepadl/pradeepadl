@@ -1,0 +1,313 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0006-01-create-tsub-client-details
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_client_details
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: prty_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tsub_client_details_prty
+                    foreignKeyName: fk_tsub_client_details_prty
+                    references: tmstr_parties(id)
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_client_details_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: clnt_num
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tsub_client_details_num
+              - column:
+                  name: aml_sta
+                  type: aml_status_type
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ctry_cd
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_tsub_client_details_ctry
+                    references: tlkp_countries(ctry_cd)
+              - column:
+                  name: regn_cd
+                  type: VARCHAR(10)
+                  constraints:
+                    foreignKeyName: fk_tsub_client_details_regn
+                    references: tlkp_regions(regn_cd)
+              - column:
+                  name: clnt_risk_rtg
+                  type: risk_rating_type
+              - column:
+                  name: ctry_risk_rtg
+                  type: risk_rating_type
+              - column:
+                  name: is_japan_asl
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_vgsi
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_vpl
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_test_record
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tsub_client_details_tenant_id
+            tableName: tsub_client_details
+            columns:
+              - column:
+                  name: tenant_id
+
+  - changeSet:
+      id: 0006-02-create-tsub-client-classifications
+      author: cddp
+      comment: 1:1 subtype of tsub_client_details — PK is the FK, no surrogate key.
+      changes:
+        - createTable:
+            tableName: tsub_client_classifications
+            columns:
+              - column:
+                  name: clnt_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_tsub_client_classifications_clnt
+                    references: tsub_client_details(id)
+              - column:
+                  name: inst_typ
+                  type: VARCHAR(50)
+              - column:
+                  name: is_ofac_sanctions
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: non_ofac_sanctions
+                  type: TEXT
+              - column:
+                  name: is_sponsoring_only
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_fintech
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_crpt_clnt
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_crpt_spsr
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_dgtl_bank
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_sdn_mnrty
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_ssl
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_vcas
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: vcas_risk_rtg
+                  type: VARCHAR(20)
+              - column:
+                  name: is_mani_ovrd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ovrd_rsn
+                  type: TEXT
+
+  - changeSet:
+      id: 0006-03-create-tsub-client-attributes
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_client_attributes
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: clnt_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_client_attributes_clnt
+                    references: tsub_client_details(id)
+              - column:
+                  name: attr_cd
+                  type: VARCHAR(50)
+                  constraints:
+                    foreignKeyName: fk_tsub_client_attributes_defn
+                    references: tlkp_attr_defns(attr_cd)
+              - column:
+                  name: val_bool
+                  type: BOOLEAN
+              - column:
+                  name: val_txt
+                  type: TEXT
+              - column:
+                  name: val_numrc
+                  type: NUMERIC
+              - column:
+                  name: val_dt
+                  type: DATE
+              - column:
+                  name: val_json
+                  type: JSONB
+        - addUniqueConstraint:
+            tableName: tsub_client_attributes
+            columnNames: clnt_id, attr_cd
+            constraintName: uk_tsub_client_attributes_clnt_attr
+        - sql:
+            sql: >
+              CREATE INDEX ix_tsub_client_attributes_val_json_gin
+              ON tsub_client_attributes USING GIN (val_json);
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS ix_tsub_client_attributes_val_json_gin;
+
+  - changeSet:
+      id: 0006-04-create-tsub-client-jurisdictions
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_client_jurisdictions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: clnt_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_client_jurisdictions_clnt
+                    references: tsub_client_details(id)
+              - column:
+                  name: jrsdctn_typ
+                  type: VARCHAR(50)
+              - column:
+                  name: ctry_cd
+                  type: CHAR(2)
+                  constraints:
+                    foreignKeyName: fk_tsub_client_jurisdictions_ctry
+                    references: tlkp_countries(ctry_cd)
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tsub_client_jurisdictions_clnt_id
+            tableName: tsub_client_jurisdictions
+            columns:
+              - column:
+                  name: clnt_id
+
+  - changeSet:
+      id: 0006-05-add-fk-trel-party-rel-root-client
+      author: cddp
+      comment: >
+        Deferred constraint from 0005-party.yaml — trel_party_relationships
+        was created before tsub_client_details existed.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: trel_party_relationships
+            baseColumnNames: root_clnt_id
+            constraintName: fk_trel_party_rel_root_clnt
+            referencedTableName: tsub_client_details
+            referencedColumnNames: id

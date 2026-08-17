@@ -1,0 +1,500 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0003-01-create-tlkp-regions
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_regions
+            columns:
+              - column:
+                  name: regn_cd
+                  type: VARCHAR(10)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: regn_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descr
+                  type: TEXT
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: srt_ord
+                  type: INTEGER
+
+  - changeSet:
+      id: 0003-02-create-tlkp-countries
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_countries
+            columns:
+              - column:
+                  name: ctry_cd
+                  type: CHAR(2)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code_alpha3
+                  type: CHAR(3)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_countries_alpha3
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: numerc_cd
+                  type: CHAR(3)
+              - column:
+                  name: regn_cd
+                  type: VARCHAR(10)
+                  constraints:
+                    foreignKeyName: fk_tlkp_countries_regn
+                    references: tlkp_regions(regn_cd)
+              - column:
+                  name: sub_regn
+                  type: VARCHAR(100)
+              - column:
+                  name: risk_rtg
+                  type: VARCHAR(20)
+        - createIndex:
+            indexName: ix_tlkp_countries_regn_cd
+            tableName: tlkp_countries
+            columns:
+              - column:
+                  name: regn_cd
+
+  - changeSet:
+      id: 0003-03-create-tlkp-state-provinces
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_state_provinces
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: ctry_cd
+                  type: CHAR(2)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tlkp_state_provinces_ctry
+                    references: tlkp_countries(ctry_cd)
+              - column:
+                  name: st_cd
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: st_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: tlkp_state_provinces
+            columnNames: ctry_cd, st_cd
+            constraintName: uk_tlkp_state_provinces_ctry_st
+
+  - changeSet:
+      id: 0003-04-create-tlkp-nm-typs
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_nm_typs
+            columns:
+              - column:
+                  name: nm_typ_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_nm_typs_cd
+              - column:
+                  name: nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descr
+                  type: TEXT
+              - column:
+                  name: srt_ord
+                  type: INTEGER
+
+  - changeSet:
+      id: 0003-05-create-tlkp-id-type
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_id_type
+            columns:
+              - column:
+                  name: id_type_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_id_type_cd
+              - column:
+                  name: nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: appl_to_prty_typ
+                  type: VARCHAR(20)
+              - column:
+                  name: is_uniq_per_prty
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: has_expiry
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 0003-06-create-tlkp-addr-typ
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_addr_typ
+            columns:
+              - column:
+                  name: addr_typ_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_addr_typ_cd
+              - column:
+                  name: nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: srt_ord
+                  type: INTEGER
+
+  - changeSet:
+      id: 0003-07-create-tlkp-cntc-typs
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_cntc_typs
+            columns:
+              - column:
+                  name: cntc_typ_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_cntc_typs_cd
+              - column:
+                  name: nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: srt_ord
+                  type: INTEGER
+
+  - changeSet:
+      id: 0003-08-create-tlkp-relnshp-type
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_relnshp_type
+            columns:
+              - column:
+                  name: relnshp_typ_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_relnshp_type_cd
+              - column:
+                  name: nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: has_ownrshp_pct
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 0003-09-create-tlkp-risk-lctr-type
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_risk_lctr_type
+            columns:
+              - column:
+                  name: risk_lctr_type_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: typ_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_risk_lctr_type_cd
+              - column:
+                  name: typ_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descr
+                  type: TEXT
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: srt_ord
+                  type: INTEGER
+
+  - changeSet:
+      id: 0003-10-create-tlkp-attr-defns
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_attr_defns
+            columns:
+              - column:
+                  name: attr_defn_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: attr_cd
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_attr_defns_cd
+              - column:
+                  name: disp_nm
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: data_typ
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: catgy
+                  type: VARCHAR(50)
+              - column:
+                  name: alwd_val
+                  type: JSONB
+              - column:
+                  name: is_reqd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: vldtn_ptrn
+                  type: VARCHAR(255)
+              - column:
+                  name: srce_sys
+                  type: VARCHAR(50)
+        - sql:
+            sql: >
+              CREATE INDEX ix_tlkp_attr_defns_alwd_val_gin
+              ON tlkp_attr_defns USING GIN (alwd_val);
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS ix_tlkp_attr_defns_alwd_val_gin;
+
+  - changeSet:
+      id: 0003-11-create-tlkp-doc-typs
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_doc_typs
+            columns:
+              - column:
+                  name: doc_typ_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_doc_typs_cd
+              - column:
+                  name: nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: allowed_mime_types
+                  type: TEXT
+              - column:
+                  name: max_size_bytes
+                  type: BIGINT
+              - column:
+                  name: has_expiry
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 0003-12-create-tlkp-srce-sys
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_srce_sys
+            columns:
+              - column:
+                  name: srce_sys_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: sys_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tlkp_srce_sys_cd
+              - column:
+                  name: sys_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cntc_team
+                  type: VARCHAR(100)
+
+  - changeSet:
+      id: 0003-13-create-tlkp-lovs
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tlkp_lovs
+            columns:
+              - column:
+                  name: lov_id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: lov_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lov_val
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lov_disp
+                  type: VARCHAR(150)
+              - column:
+                  name: lov_key
+                  type: INTEGER
+              - column:
+                  name: catgy
+                  type: VARCHAR(50)
+              - column:
+                  name: srt_ord
+                  type: INTEGER
+        - addUniqueConstraint:
+            tableName: tlkp_lovs
+            columnNames: lov_nm, lov_val
+            constraintName: uk_tlkp_lovs_nm_val

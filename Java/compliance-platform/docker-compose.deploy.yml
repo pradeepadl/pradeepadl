@@ -72,6 +72,23 @@ services:
       dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      # AES-256 key for tcfg_llm_provider_cfgs.api_key_encrypted (see
+      # com.cddp.ai.crypto.ApiKeyCipher). Generate with:
+      #   openssl rand -base64 32
+      # Read lazily — the app starts fine without it; only saving/reading
+      # an LLM provider config fails until it's set. Losing this key makes
+      # every previously-saved API key permanently undecryptable.
+      LLM_CONFIG_ENCRYPTION_KEY: ${LLM_CONFIG_ENCRYPTION_KEY:-}
+      # OAuth2 client-credentials secret for the ai-kyc-agent client (see
+      # com.cddp.config.SecurityConfig / application.properties) — must
+      # match ai-kyc-agent's OAUTH2_CLIENT_SECRET below, hence the shared
+      # var and shared default rather than two independently-set values.
+      AI_KYC_AGENT_CLIENT_SECRET: ${AI_KYC_AGENT_CLIENT_SECRET:-ai-kyc-agent-dev-secret}
+      # Demo admin login for the frontend (POST /api/auth/login) — dev-only,
+      # same "hardcoded local secret" convention as POSTGRES_PASSWORD/
+      # NEO4J_AUTH above.
+      DEMO_ADMIN_USERNAME: ${DEMO_ADMIN_USERNAME:-admin}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-changeme}
     ports:
       - "8080:8080"
     depends_on:
@@ -84,10 +101,43 @@ services:
       neo4j:
         condition: service_healthy
 
+  ai-kyc-agent:
+    # Python AI agent microservice — see files/ai-agent-integration-plan.md.
+    # Consumes ai.agent.requests / publishes ai.agent.responses on the
+    # rabbitmq service above; JAVA_BACKEND_URL/OAUTH2_* back the
+    # JavaBackendTool agents use to call into Java mid-reasoning.
+    build:
+      context: .
+      dockerfile: pySDK/services/kyc-risk-agent/Dockerfile
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RABBITMQ_URL: amqp://myuser:secret@rabbitmq:5672/
+      JAVA_BACKEND_URL: http://backend:8080
+      OAUTH2_TOKEN_URL: http://backend:8080/oauth2/token
+      OAUTH2_CLIENT_ID: ai-kyc-agent
+      # Must match backend's AI_KYC_AGENT_CLIENT_SECRET above — same var,
+      # same default, so they can't silently drift apart.
+      OAUTH2_CLIENT_SECRET: ${AI_KYC_AGENT_CLIENT_SECRET:-ai-kyc-agent-dev-secret}
+    ports:
+      - "8001:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # Fixed tmstr_tenants row seeded by
+        # ddl/dml/0003-demo-tenant-seed.yaml — keep these two in lockstep,
+        # this is what AiWiringCheckPanel / AiModelProviderPanel submit
+        # requests against. VITE_API_BASE_URL is left at its default
+        # (http://localhost:8080) since the browser calls the backend's
+        # host-exposed port directly, same origin either way for local dev.
+        VITE_DEMO_TENANT_ID: 403d8aad-2cf9-435a-8d4d-92ea414f9e97
     ports:
       - "3000:80"
     depends_on:

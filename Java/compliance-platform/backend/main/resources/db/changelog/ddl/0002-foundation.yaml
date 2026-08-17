@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0002-01-extension-pgcrypto
+      author: cddp
+      comment: >
+        gen_random_uuid() for all uuid primary keys across the CDDP schema.
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS pgcrypto;
+      rollback:
+        - sql:
+            sql: DROP EXTENSION IF EXISTS pgcrypto;
+
+  - changeSet:
+      id: 0002-02-type-party-type
+      author: cddp
+      comment: >
+        Placeholder value set — confirm with business/compliance before
+        relying on it; ALTER TYPE ... ADD VALUE to extend later.
+      changes:
+        - sql:
+            sql: CREATE TYPE party_type AS ENUM ('INDIVIDUAL', 'ORGANIZATION');
+      rollback:
+        - sql:
+            sql: DROP TYPE IF EXISTS party_type;
+
+  - changeSet:
+      id: 0002-03-type-aml-status-type
+      author: cddp
+      comment: >
+        Placeholder value set — confirm with business/compliance before
+        relying on it. Must stay in sync with the from_sta/to_sta values
+        used in tlkp_aml_status_transitions (stored as varchar there).
+      changes:
+        - sql:
+            sql: >
+              CREATE TYPE aml_status_type AS ENUM
+              ('PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'SUSPENDED', 'CLOSED');
+      rollback:
+        - sql:
+            sql: DROP TYPE IF EXISTS aml_status_type;
+
+  - changeSet:
+      id: 0002-04-type-risk-rating-type
+      author: cddp
+      comment: >
+        Placeholder value set — confirm with business/compliance before
+        relying on it.
+      changes:
+        - sql:
+            sql: CREATE TYPE risk_rating_type AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
+      rollback:
+        - sql:
+            sql: DROP TYPE IF EXISTS risk_rating_type;
+
+  - changeSet:
+      id: 0002-05-type-case-status
+      author: cddp
+      comment: >
+        Placeholder value set — confirm with business/compliance before
+        relying on it.
+      changes:
+        - sql:
+            sql: >
+              CREATE TYPE case_status AS ENUM
+              ('OPEN', 'IN_PROGRESS', 'PENDING_REVIEW', 'ESCALATED', 'CLOSED', 'REOPENED');
+      rollback:
+        - sql:
+            sql: DROP TYPE IF EXISTS case_status;

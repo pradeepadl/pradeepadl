@@ -6,6 +6,15 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+
+# Vite inlines import.meta.env.VITE_* at build time, not runtime — these
+# have to be build args (passed via docker-compose.deploy.yml's
+# frontend.build.args), not container env vars set later.
+ARG VITE_API_BASE_URL
+ARG VITE_DEMO_TENANT_ID
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL} \
+    VITE_DEMO_TENANT_ID=${VITE_DEMO_TENANT_ID}
+
 RUN npm run build
 
 # ── Serve stage ──────────────────────────────────────────────────────────────

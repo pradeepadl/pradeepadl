@@ -1,0 +1,184 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0009-01-create-tmstr-cases
+      author: cddp
+      comment: >
+        case_typ_cd and case_typ_lov_nm have no FK — no single lookup table
+        cleanly matches either (tlkp_lovs' unique key is the (lov_nm,
+        lov_val) pair, not lov_nm alone).
+      changes:
+        - createTable:
+            tableName: tmstr_cases
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tmstr_cases_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: case_num
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tmstr_cases_num
+              - column:
+                  name: clnt_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tmstr_cases_clnt
+                    references: tsub_client_details(id)
+              - column:
+                  name: case_typ_cd
+                  type: VARCHAR(30)
+              - column:
+                  name: case_typ_lov_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: case_sta
+                  type: case_status
+                  defaultValue: OPEN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: case_ownr_id
+                  type: VARCHAR(100)
+              - column:
+                  name: descr
+                  type: TEXT
+              - column:
+                  name: prlty
+                  type: TEXT
+              - column:
+                  name: due_dt
+                  type: DATE
+              - column:
+                  name: is_sys_gentd
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reopnd_rsns
+                  type: TEXT
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+        - createIndex:
+            indexName: ix_tmstr_cases_clnt_id
+            tableName: tmstr_cases
+            columns:
+              - column:
+                  name: clnt_id
+        - createIndex:
+            indexName: ix_tmstr_cases_tenant_id
+            tableName: tmstr_cases
+            columns:
+              - column:
+                  name: tenant_id
+
+  - changeSet:
+      id: 0009-02-create-tsub-case-events
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tsub_case_events
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: case_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tsub_case_events_case
+                    references: tmstr_cases(id)
+              - column:
+                  name: evt_typ
+                  type: VARCHAR(50)
+              - column:
+                  name: old_val
+                  type: TEXT
+              - column:
+                  name: new_val
+                  type: TEXT
+              - column:
+                  name: rsn
+                  type: TEXT
+              - column:
+                  name: actr
+                  type: VARCHAR(100)
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+        - createIndex:
+            indexName: ix_tsub_case_events_case_id
+            tableName: tsub_case_events
+            columns:
+              - column:
+                  name: case_id
+
+  - changeSet:
+      id: 0009-03-add-case-id-to-tmstr-documents
+      author: cddp
+      comment: >
+        Makes the ERD's "TMSTR_CASES ||--o{ TMSTR_DOCUMENTS : attaches"
+        relationship real — tmstr_documents (0007) predates tmstr_cases,
+        so the column is added here once the target table exists.
+      changes:
+        - addColumn:
+            tableName: tmstr_documents
+            columns:
+              - column:
+                  name: case_id
+                  type: UUID
+        - addForeignKeyConstraint:
+            baseTableName: tmstr_documents
+            baseColumnNames: case_id
+            constraintName: fk_tmstr_documents_case
+            referencedTableName: tmstr_cases
+            referencedColumnNames: id
+        - createIndex:
+            indexName: ix_tmstr_documents_case_id
+            tableName: tmstr_documents
+            columns:
+              - column:
+                  name: case_id

@@ -23,6 +23,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { UserManagementPage } from "./pages/admin/UserManagementPage";
 import { CompliancePoliciesPage } from "./pages/admin/CompliancePoliciesPage";
 import { IntegrationsPage } from "./pages/admin/IntegrationsPage";
+import { isLoggedIn, getCurrentUsername, logout } from "./lib/apiClient";
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 // Mock data lives in ./data.ts (shared with the pages above); a few LOVs and
@@ -1835,8 +1836,10 @@ const NAV_RIGHT: { key: string; label: string; icon: React.ElementType; badge?: 
 // ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser]         = useState("");
+  // Restored from sessionStorage on load (see apiClient.ts) so a page
+  // refresh doesn't bounce a still-logged-in user back to LoginPage.
+  const [isAuthenticated, setIsAuthenticated] = useState(isLoggedIn);
+  const [currentUser, setCurrentUser]         = useState(() => getCurrentUsername() ?? "");
 
   const [active, setActive]                     = useState("dashboard");
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -1850,6 +1853,7 @@ export default function App() {
 
   function handleLogin(username: string) { setCurrentUser(username); setIsAuthenticated(true); }
   function handleLogout() {
+    logout();
     setIsAuthenticated(false); setCurrentUser("");
     setActive("dashboard"); setSelectedClientId(null); setSelectedAlertId(null); setSelectedCaseId(null); setAdminSection(null);
   }

@@ -1,0 +1,7 @@
+# cddp-ai-sdk itself is installed separately in the Dockerfile
+# (COPY pySDK/sdk + pip install ./sdk) so image layer caching stays
+# effective when only this service's code changes. For local dev outside
+# Docker: pip install -e ../../sdk -r requirements.txt
+#
+# No extra dependencies beyond the SDK yet — add service-specific ones here
+# as this agent grows.

@@ -1,0 +1,36 @@
+[project]
+name = "cddp-ai-sdk"
+version = "0.1.0"
+description = "Shared foundation for CDDP AI agent microservices: the Java/Python message contract, an LLM provider abstraction, LangGraph agent base classes, RabbitMQ transport, and a Java-backend tool for agents to call back into case/client data."
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.7",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "aio-pika>=9.4",
+  "httpx>=0.27",
+  "langgraph>=0.2",
+  "langchain-core>=0.3",
+  "langchain-anthropic>=0.2",
+  "anthropic>=0.34",
+  "structlog>=24.1",
+]
+
+# Only Claude's SDK is a base dependency (see llm/anthropic_provider.py).
+# Gemini/HuggingFace are lazy-imported inside their provider classes
+# (see llm/gemini_provider.py, llm/huggingface_provider.py) specifically
+# so a deployment that never selects those providers via the admin
+# Integrations page doesn't need their SDKs installed at all. A service
+# that wants to support them installs the matching extra:
+#   pip install cddp-ai-sdk[gemini,huggingface]
+[project.optional-dependencies]
+gemini = ["google-genai>=0.3", "langchain-google-genai>=2.0"]
+huggingface = ["huggingface_hub>=0.26", "langchain-huggingface>=0.1"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cddp_ai_sdk*"]

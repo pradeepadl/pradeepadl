@@ -1,0 +1,92 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0011-01-create-tlog-ai-agent-jobs
+      author: cddp
+      comment: >
+        Backs the Java <-> Python AI agent integration (see
+        files/ai-agent-integration-plan.md): Java writes a PENDING row and
+        publishes to RabbitMQ, the Python agent service publishes its
+        result back, and a listener updates this row. The frontend polls
+        it via AiAgentController. Subject to tcfg_data_rtntn_plcy like
+        every other table — flag this table once retention rules for
+        AI prompt/response data are decided, since request_payload and
+        response_payload may contain KYC/PII data.
+      changes:
+        - createTable:
+            tableName: tlog_ai_agent_jobs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tlog_ai_agent_jobs_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: agent_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: requested_by
+                  type: VARCHAR(150)
+              - column:
+                  name: case_id
+                  type: UUID
+              - column:
+                  name: client_id
+                  type: UUID
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: request_payload
+                  type: JSONB
+              - column:
+                  name: response_payload
+                  type: JSONB
+              - column:
+                  name: error_message
+                  type: TEXT
+              - column:
+                  name: model
+                  type: VARCHAR(100)
+              - column:
+                  name: token_usage
+                  type: JSONB
+              - column:
+                  name: submitted_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completed_ts
+                  type: TIMESTAMP
+              - column:
+                  name: duration_ms
+                  type: BIGINT
+        - createIndex:
+            indexName: ix_tlog_ai_agent_jobs_tenant_id
+            tableName: tlog_ai_agent_jobs
+            columns:
+              - column:
+                  name: tenant_id
+        - createIndex:
+            indexName: ix_tlog_ai_agent_jobs_status_submitted
+            tableName: tlog_ai_agent_jobs
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: submitted_ts

@@ -1,0 +1,384 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0004-01-create-tmstr-schma-vers
+      author: cddp
+      comment: >
+        Technical/internal table — tracks applied schema versions. No
+        tenant scoping, no relationship to any other table.
+      changes:
+        - createTable:
+            tableName: tmstr_schma_vers
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: ver_num
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applid_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applid_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: chksum
+                  type: VARCHAR(128)
+              - column:
+                  name: is_sccs
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 0004-02-create-tmstr-tenants
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tmstr_tenants
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_cd
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tmstr_tenants_cd
+              - column:
+                  name: tenant_nm
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: parent_tenant_id
+                  type: UUID
+                  constraints:
+                    foreignKeyName: fk_tmstr_tenants_parent
+                    references: tmstr_tenants(id)
+              - column:
+                  name: tenant_typ
+                  type: VARCHAR(30)
+              - column:
+                  name: regn_cd
+                  type: VARCHAR(10)
+                  constraints:
+                    foreignKeyName: fk_tmstr_tenants_regn
+                    references: tlkp_regions(regn_cd)
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: ix_tmstr_tenants_parent
+            tableName: tmstr_tenants
+            columns:
+              - column:
+                  name: parent_tenant_id
+        - createIndex:
+            indexName: ix_tmstr_tenants_regn_cd
+            tableName: tmstr_tenants
+            columns:
+              - column:
+                  name: regn_cd
+
+  - changeSet:
+      id: 0004-03-create-tlkp-aml-status-transitions
+      author: cddp
+      comment: >
+        Composite PK (tenant_id, from_sta, to_sta); per-tenant, so lives
+        after tmstr_tenants rather than in the lookups module.
+      changes:
+        - createTable:
+            tableName: tlkp_aml_status_transitions
+            columns:
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_aml_status_trans_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: from_sta
+                  type: VARCHAR(30)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: to_sta
+                  type: VARCHAR(30)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: actv_flg
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+
+  - changeSet:
+      id: 0004-04-create-tcfg-tenant-cfgs
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tcfg_tenant_cfgs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tcfg_tenant_cfgs_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: cfg_key
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cfg_val
+                  type: TEXT
+              - column:
+                  name: cfg_json
+                  type: JSONB
+              - column:
+                  name: is_actv
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: tcfg_tenant_cfgs
+            columnNames: tenant_id, cfg_key
+            constraintName: uk_tcfg_tenant_cfgs_tenant_key
+        - sql:
+            sql: >
+              CREATE INDEX ix_tcfg_tenant_cfgs_cfg_json_gin
+              ON tcfg_tenant_cfgs USING GIN (cfg_json);
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS ix_tcfg_tenant_cfgs_cfg_json_gin;
+
+  - changeSet:
+      id: 0004-05-create-tcfg-tenant-attribute-cfgs
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tcfg_tenant_attribute_cfgs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tcfg_tenant_attr_cfgs_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: attribute_code
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_required
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_visible
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: display_order
+                  type: INTEGER
+              - column:
+                  name: risk_weight
+                  type: DECIMAL(5,2)
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: tcfg_tenant_attribute_cfgs
+            columnNames: tenant_id, attribute_code
+            constraintName: uk_tcfg_tenant_attr_cfgs_tenant_code
+
+  - changeSet:
+      id: 0004-06-create-tcfg-data-rtntn-plcy
+      author: cddp
+      changes:
+        - createTable:
+            tableName: tcfg_data_rtntn_plcy
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tcfg_data_rtntn_plcy_tenant
+                    references: tmstr_tenants(id)
+              - column:
+                  name: tbl_nm
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rtntn_days
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_archv_enbl
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_purge_enbl
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_ts
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crtd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: last_updd_ts
+                  type: TIMESTAMP
+              - column:
+                  name: last_updd_nm
+                  type: VARCHAR(100)
+              - column:
+                  name: ver
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: tcfg_data_rtntn_plcy
+            columnNames: tenant_id, tbl_nm
+            constraintName: uk_tcfg_data_rtntn_plcy_tenant_tbl

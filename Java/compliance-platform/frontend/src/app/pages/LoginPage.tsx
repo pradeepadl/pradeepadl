@@ -1,20 +1,30 @@
 import { useState } from "react";
-import { Shield, Lock, User, AlertCircle } from "lucide-react";
+import { Shield, Lock, User, AlertCircle, Loader2 } from "lucide-react";
+import { login } from "../lib/apiClient";
 
 export function LoginPage({ onLogin }: { onLogin: (username: string) => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       setError("Enter both username and password.");
       return;
     }
     setError("");
-    onLogin(username.trim());
+    setIsSubmitting(true);
+    try {
+      await login(username.trim(), password);
+      onLogin(username.trim());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -91,9 +101,11 @@ export function LoginPage({ onLogin }: { onLogin: (username: string) => void }) 
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20"
+            disabled={isSubmitting}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Sign In
+            {isSubmitting && <Loader2 size={14} className="animate-spin" />}
+            {isSubmitting ? "Signing in…" : "Sign In"}
           </button>
 
           <div className="text-center text-[11px] text-gray-300">
